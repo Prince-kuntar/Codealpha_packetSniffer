@@ -72,4 +72,34 @@ class PacketSniffer:
             self.protocol_stats['ICMP'] += 1
             print("ICMP Packet")        
 
+    #fun to convert TCP flags to human readable format
+    def get_TCP_flags(self, tcp): 
+        flag_names = {
+            'F': 'FIN', 'S': 'SYN', 'R': 'RST',
+            'P': 'PSH', 'A': 'ACK', 'U': 'URG',
+            'E': 'ECE', 'C': 'CWR' }
+        return ' '.join([name for flag, name in flag_names.items() if tcp.flags & getattr(TCP, flag)])
 
+    #fun to analyse payload
+    def analyse_payload(self, payload):
+        if len(payload) > 0:
+            print(f"Payload ({len(payload)} bytes):")
+            print(payload)
+
+            #trying to detect https content
+            if b"HTTP" in payload or b"GET" in payload or b"POST" in payload:
+                print("Possible HTTP content detected.")
+
+                try:
+                    payload_text = payload.decode('utf-8', errors='ignore')
+                    headers = payload_text.split('\r\n')[:5]
+                    for header in headers:
+                        if header.strip():
+                            print(f"  {header.strip()}")
+                except:
+                    pass
+
+            #show hex preview for non-text payloads
+            elif len(payload) < 50:
+                print("Hex Preview:")
+                print(payload.hex())
