@@ -20,7 +20,8 @@ class PacketSniffer:
         if packet.haslayer(Ether):
             eth = packet[Ether]
             self.protocol_stats['Ethernet'] += 1
-            print(f"MAC: {eth.src} -> {eth.dst}")
+            print(f"MAC: {eth.src} -> {eth.dst}\n")
+            print("=======================================================================================")
         
 
         if packet.haslayer(IP):
@@ -38,6 +39,7 @@ class PacketSniffer:
 
             print(f"TTL: {ip.ttl}")
             print(f"Size: {len(packet)} bytes")
+            print("=======================================================================================")
 
         #analysing Transport Layer(TCP/UDP/ICMP)
         self.analyse_transport(packet)
@@ -61,6 +63,8 @@ class PacketSniffer:
             if tcp.haslayer(Raw):
                 payload = tcp[Raw].load
                 self.analyse_payload(payload)
+            else:
+                print("=======================================================================================")
         #UDP
         elif packet.haslayer(UDP):
 
@@ -72,11 +76,14 @@ class PacketSniffer:
             if udp.haslayer(Raw):
                 payload = udp[Raw].load
                 self.analyse_payload(payload)
+            else:
+                print("=======================================================================================")
 
         #ICMP
         elif packet.haslayer(ICMP):
             self.protocol_stats['ICMP'] += 1
-            print("ICMP Packet")        
+            print("ICMP Packet") 
+            print("=======================================================================================")       
 
     #fun to convert TCP flags to human readable format
     def get_TCP_flags(self, tcp): 
@@ -105,7 +112,18 @@ class PacketSniffer:
     def analyse_payload(self, payload):
         if len(payload) > 0:
             print(f"Payload ({len(payload)} bytes):")
-            print(payload)
+            print(f"{GREEN}\n📦 Payload ---{RESET}")
+            print(f"{GREEN}   Payload length: {len(payload)} bytes{RESET}")
+            try:
+                # Try to decode as text
+                text = payload.decode('utf-8', errors='ignore')
+                if any(c.isprintable() for c in text[:50]):
+                    print(f"{GREEN}   Payload preview: {text[:100]}...{RESET}")
+            except:
+                print(f"{GREEN}   Payload (hex): {payload.hex()[:100]}...{RESET}")
+
+            print("=======================================================================================")            
+
 
             #trying to detect https content
             if b"HTTP" in payload or b"GET" in payload or b"POST" in payload:
@@ -117,18 +135,22 @@ class PacketSniffer:
                     for header in headers:
                         if header.strip():
                             print(f"  {header.strip()}")
+
+                    print("=======================================================================================")        
                 except:
                     pass
-
+            
+                
             #show hex preview for non-text payloads
             elif len(payload) < 50:
                 print("Hex Preview:")
                 print(payload.hex())
+                print("=======================================================================================")
 
     #function to display statistics summary
     def display_summary(self):
         duration = time.time() - self.start_time
-        print("\n--- Summary ---")
+        print("\n---------------------------- Summary ----------------------------------")
         print(f"Total Packets: {self.packet_counts}")
         print(f"Duration: {duration:.2f} seconds")
         print(f"\n Statistics (after {self.packet_counts} packets, {duration:.1f}s):")
@@ -137,6 +159,7 @@ class PacketSniffer:
                 percentage = (count / self.packet_counts) * 100
                 print(f"  {protocol}: {count} packets ({percentage:.1f}%)")
         print()
+        print("=======================================================================================")
 #end of PacketSniffer class
 
 
