@@ -1,12 +1,18 @@
-from scapy.all import*
+from scapy.all import *
 import collections
 import time
+
+
+# Green color codes
+GREEN = '\033[92m'
+BOLD = '\033[1m'
+RESET = '\033[0m'
 
 class PacketSniffer:
     def __init__(self):
         self.packet_counts = 0
-        self.protocol_stats = collections.Counter
-        self.time = time.time()
+        self.protocol_stats = collections.Counter()
+        self.start_time = time.time()
 
     def packet_handler(self, packet):
         self.packet_counts += 1
@@ -14,13 +20,13 @@ class PacketSniffer:
         if packet.haslayer(Ether):
             eth = packet[Ether]
             self.protocol_stats['Ethernet'] += 1
-            print(f"MAC: {eth.src} -> {eth.dest}")
+            print(f"MAC: {eth.src} -> {eth.dst}")
         
 
-        if packet.hasLayer(IP):
+        if packet.haslayer(IP):
             ip = packet[IP]
             self.protocol_stats['IP'] += 1
-            print(f"IP: {ip.src} -> {ip.dest}")
+            print(f"IP: {ip.src} -> {ip.dst}")
 
             #analysing the protocols
             proto = ip.proto
@@ -34,14 +40,14 @@ class PacketSniffer:
             print(f"Size: {len(packet)} bytes")
 
         #analysing Transport Layer(TCP/UDP/ICMP)
-        self.analyse_trasport(self,packet)
+        self.analyse_transport(packet)
 
         #display summary every 10 packets
         if self.packet_counts % 10 == 0:
             self.display_summary()
 
-    # fun to analysse transport layer
-    def analyse_trasport(self, packet):
+    # fun to analyse transport layer
+    def analyse_transport(self, packet):
 
         #TCP
         if packet.haslayer(TCP):
@@ -78,7 +84,22 @@ class PacketSniffer:
             'F': 'FIN', 'S': 'SYN', 'R': 'RST',
             'P': 'PSH', 'A': 'ACK', 'U': 'URG',
             'E': 'ECE', 'C': 'CWR' }
-        return ' '.join([name for flag, name in flag_names.items() if tcp.flags & getattr(TCP, flag)])
+        # Try to get a string representation of TCP flags (e.g. "S" or "SA")
+        try:
+            flags_str = tcp.sprintf("%flags%")
+        except Exception:
+            flags_str = str(tcp.flags)
+
+        # If sprintf returns empty or numeric, fall back to numeric bit mask
+        if not flags_str or flags_str.isdigit():
+            try:
+                flags_val = int(flags_str)
+            except Exception:
+                flags_val = int(tcp.flags)
+            masks = {'F': 0x01, 'S': 0x02, 'R': 0x04, 'P': 0x08, 'A': 0x10, 'U': 0x20, 'E': 0x40, 'C': 0x80}
+            return ' '.join([name for ch, name in flag_names.items() if flags_val & masks[ch]])
+        else:
+            return ' '.join([name for ch, name in flag_names.items() if ch in flags_str])
 
     #fun to analyse payload
     def analyse_payload(self, payload):
@@ -106,19 +127,47 @@ class PacketSniffer:
 
     #function to display statistics summary
     def display_summary(self):
-        duration = time.time() - self.time
+        duration = time.time() - self.start_time
         print("\n--- Summary ---")
         print(f"Total Packets: {self.packet_counts}")
         print(f"Duration: {duration:.2f} seconds")
-        print(f"\n Statistics (after {self.packet_count} packets, {duration:.1f}s):")
-        for protocol, count in self.protocol_stats.most_common():
-            percentage = (count / self.packet_count) * 100
-            print(f"  {protocol}: {count} packets ({percentage:.1f}%)")
+        print(f"\n Statistics (after {self.packet_counts} packets, {duration:.1f}s):")
+        if self.packet_counts:
+            for protocol, count in self.protocol_stats.most_common():
+                percentage = (count / self.packet_counts) * 100
+                print(f"  {protocol}: {count} packets ({percentage:.1f}%)")
         print()
 #end of PacketSniffer class
 
+
+def display_banner():
+    """Display Ultimate Sniffer banner in green"""
+    banner = f"""
+{GREEN}{BOLD}
+
+    ██╗   ██╗██╗  ████████╗███╗   ███╗ █████╗ ████████╗███████╗    
+    ██║   ██║██║  ╚══██╔══╝████╗ ████║██╔══██╗╚══██╔══╝██╔════╝    
+    ██║   ██║██║     ██║   ██╔████╔██║███████║   ██║   █████╗      
+    ██║   ██║██║     ██║   ██║╚██╔╝██║██╔══██║   ██║   ██╔══╝      
+    ╚██████╔╝███████╗██║   ██║ ╚═╝ ██║██║  ██║   ██║   ███████╗    
+     ╚═════╝ ╚══════╝╚═╝   ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝    
+                                                              
+               ███████╗███╗   ██╗██╗███████╗███████╗██████╗         
+               ██╔════╝████╗  ██║██║██╔════╝██╔════╝██╔══██╗        
+               ███████╗██╔██╗ ██║██║█████╗  █████╗  ██████╔╝        
+               ╚════██║██║╚██╗██║██║██╔══╝  ██╔══╝  ██╔══██╗        
+               ███████║██║ ╚████║██║██╗     ███████╗██║  ██║        
+               ╚══════╝╚═╝  ╚═══╝╚═╝╚══     ╚══════╝╚═╝  ╚═╝        
+                                                              
+                     by Prince Damiano                        
+                                                              
+{RESET}
+"""
+    print(banner)
+
 def main():
     sniffer = PacketSniffer()
+    display_banner()
     print("Starting packet capture... Press Ctrl+C to stop.")
     try:
         sniff(prn=sniffer.packet_handler, store=0)
@@ -131,3 +180,4 @@ def main():
 if __name__ == "__main__":
     main()        
 
+  
