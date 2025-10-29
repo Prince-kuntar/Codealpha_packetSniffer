@@ -103,3 +103,31 @@ class PacketSniffer:
             elif len(payload) < 50:
                 print("Hex Preview:")
                 print(payload.hex())
+
+    #function to display statistics summary
+    def display_summary(self):
+        duration = time.time() - self.time
+        print("\n--- Summary ---")
+        print(f"Total Packets: {self.packet_counts}")
+        print(f"Duration: {duration:.2f} seconds")
+        print(f"\n Statistics (after {self.packet_count} packets, {duration:.1f}s):")
+        for protocol, count in self.protocol_stats.most_common():
+            percentage = (count / self.packet_count) * 100
+            print(f"  {protocol}: {count} packets ({percentage:.1f}%)")
+        print()
+#end of PacketSniffer class
+
+def main():
+    sniffer = PacketSniffer()
+    print("Starting packet capture... Press Ctrl+C to stop.")
+    try:
+        sniff(prn=sniffer.packet_handler, store=0)
+    except KeyboardInterrupt:
+        print("\nPacket capture stopped.")
+        sniffer.display_summary()
+        print("Exiting.")
+        print("Sniffer terminated.")
+
+if __name__ == "__main__":
+    main()        
+
