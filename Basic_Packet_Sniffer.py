@@ -123,7 +123,7 @@ class PacketSniffer:
     def analyse_payload(self, payload):
         if len(payload) > 0:
             print(f"Payload ({len(payload)} bytes):")
-            print(f"{GREEN}\n📦 Payload ---{RESET}")
+            print(f"{GREEN}\nPayload ---{RESET}")
             print(f"{GREEN}   Payload length: {len(payload)} bytes{RESET}")
             try:
                 # Try to decode as text
@@ -136,7 +136,7 @@ class PacketSniffer:
             print("=======================================================================================")            
 
 
-            #trying to detect https content
+            #trying to detect https cont1ent
             if b"HTTP" in payload or b"GET" in payload or b"POST" in payload:
                 print("Possible HTTP content detected.")
 
