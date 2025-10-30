@@ -188,17 +188,81 @@ def display_banner():
 """
     print(banner)
 
+
+def display_menu():
+    """Display the main menu"""
+    print(f"{GREEN}{BOLD}")
+    print("┌─────────────────────────────────────────────┐")
+    print("│              MAIN MENU                      │")
+    print("├─────────────────────────────────────────────┤")
+    print("│                                             │")
+    print("│   1. Start Packet Sniffing                  │")
+    print("│   2. View Help                              │")
+    print("│   3. Exit                                   │")
+    print("│                                             │")
+    print("└─────────────────────────────────────────────┘")
+    print(f"{RESET}")
+
+
+def display_help():
+
+    print(f"{GREEN}")
+    print("┌─────────────────────────────────────────────┐")
+    print("│                  HELP                       │")
+    print("├─────────────────────────────────────────────┤")
+    print("│                                             │")
+    print("│   This sniffer will capture:                │")
+    print("│   • IP Packets                              │")
+    print("│   • TCP Segments                            │")
+    print("│   • UDP Datagrams                           │")
+    print("│   • ICMP Messages                           │")
+    print("│                                             │")
+    print("│   Information displayed:                    │")
+    print("│   • Source/Destination IPs                  │")
+    print("│   • Source/Destination Ports                │")
+    print("│   • Protocol types                          │")
+    print("│   • Packet payloads                         │")
+    print("│                                             │")
+    print("│   Press Ctrl+C to stop sniffing             │")
+    print("│                                             │")
+    print("└─────────────────────────────────────────────┘")
+    print(f"{RESET}")
+
+def clear_screen():
+    """Clear the terminal screen"""
+    os.system('cls' if os.name == 'nt' else 'clear')    
+
 def main():
     sniffer = PacketSniffer()
+    clear_screen()
     display_banner()
-    print("Starting packet capture... Press Ctrl+C to stop.")
-    try:
-        sniff(prn=sniffer.packet_handler, store=0)
-    except KeyboardInterrupt:
-        print("\nPacket capture stopped.")
-        sniffer.display_summary()
-        print("Exiting.")
-        print("Sniffer terminated.")
+    display_menu()
+    
+
+    choice = input(f"{GREEN}Select an option (1-3): {RESET}").strip()
+        
+    if choice == "1":
+            print("Starting packet capture... Press Ctrl+C to stop.")
+
+            try:
+                sniff(prn=sniffer.packet_handler, store=0)
+            except KeyboardInterrupt:
+                print("\nPacket capture stopped.")
+                sniffer.display_summary()
+                print("Exiting.")
+                print("Sniffer terminated.")    
+    elif choice == "2":
+            clear_screen()
+            display_banner()
+            display_help()
+            input(f"{GREEN}\nPress Enter to continue...{RESET}")
+    elif choice == "3":
+        print(f"{GREEN}\n👋 Thank you for using Ultimate Sniffer!{RESET}")
+        print(f"{GREEN}👨‍💻 Created by Prince Damiano{RESET}")
+
+    else:
+            print(f"{GREEN}❌ Invalid option. Please choose 1, 2, or 3.{RESET}")
+            time.sleep(2)   
 
 if __name__ == "__main__":
     main()        
