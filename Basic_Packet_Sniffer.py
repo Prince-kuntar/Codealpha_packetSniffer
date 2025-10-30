@@ -21,29 +21,34 @@ class PacketSniffer:
             eth = packet[Ether]
             self.protocol_stats['Ethernet'] += 1
             print(f"MAC: {eth.src} -> {eth.dst}\n")
-            print("=======================================================================================")
         
 
-        if packet.haslayer(IP):
-            ip = packet[IP]
-            self.protocol_stats['IP'] += 1
-            print(f"IP: {ip.src} -> {ip.dst}")
+            if packet.haslayer(IP):
+                ip = packet[IP]
+                self.protocol_stats['IP'] += 1
+                print(f"IP: {ip.src} -> {ip.dst}")
 
-            #analysing the protocols
-            proto = ip.proto
-            protocol_map = {1: 'ICMP', 6: 'TCP', 17: 'UDP'}
-            protocol_name = protocol_map.get(proto, f"Other({proto})")
+                #analysing the protocols
+                proto = ip.proto
+                protocol_map = {1: 'ICMP', 6: 'TCP', 17: 'UDP'}
+                protocol_name = protocol_map.get(proto, f"Other({proto})")
 
-            self.protocol_stats[protocol_name] += 1
-            print(f"Protocol: {protocol_name}")
+                self.protocol_stats[protocol_name] += 1
+                print(f"Protocol: {protocol_name}")
 
-            print(f"TTL: {ip.ttl}")
-            print(f"Size: {len(packet)} bytes")
+                print(f"TTL: {ip.ttl}")
+                print(f"Size: {len(packet)} bytes")
+                
+                #analysing Transport Layer(TCP/UDP/ICMP)
+                self.analyse_transport(packet)
+
+            else:
+                print("Non-IP Packet")
+                print("=======================================================================================")
+                    
+        else:
+            print("Non-Ethernet Packet")
             print("=======================================================================================")
-
-        #analysing Transport Layer(TCP/UDP/ICMP)
-        self.analyse_transport(packet)
-
         #display summary every 10 packets
         if self.packet_counts % 10 == 0:
             self.display_summary()
@@ -64,6 +69,7 @@ class PacketSniffer:
                 payload = tcp[Raw].load
                 self.analyse_payload(payload)
             else:
+                print("No paylod")
                 print("=======================================================================================")
         #UDP
         elif packet.haslayer(UDP):
@@ -77,13 +83,18 @@ class PacketSniffer:
                 payload = udp[Raw].load
                 self.analyse_payload(payload)
             else:
+                print("No paylod")
                 print("=======================================================================================")
 
         #ICMP
         elif packet.haslayer(ICMP):
             self.protocol_stats['ICMP'] += 1
             print("ICMP Packet") 
-            print("=======================================================================================")       
+            print("=======================================================================================")  
+
+        else:
+            print("Other Transport Layer Protocol")
+            print("=======================================================================================")                                 
 
     #fun to convert TCP flags to human readable format
     def get_TCP_flags(self, tcp): 
@@ -146,7 +157,9 @@ class PacketSniffer:
                 print("Hex Preview:")
                 print(payload.hex())
                 print("=======================================================================================")
-
+        else:
+            print("No Payload")
+            print("=======================================================================================")
     #function to display statistics summary
     def display_summary(self):
         duration = time.time() - self.start_time
@@ -257,11 +270,11 @@ def main():
             display_help()
             input(f"{GREEN}\nPress Enter to continue...{RESET}")
     elif choice == "3":
-        print(f"{GREEN}\n👋 Thank you for using Ultimate Sniffer!{RESET}")
+        print(f"{GREEN}\n Thank you for using Ultimate Sniffer!{RESET}")
         print(f"{GREEN}👨‍💻 Created by Prince Damiano{RESET}")
 
     else:
-            print(f"{GREEN}❌ Invalid option. Please choose 1, 2, or 3.{RESET}")
+            print(f"{GREEN} Invalid option. Please choose 1, 2, or 3.{RESET}")
             time.sleep(2)   
 
 if __name__ == "__main__":
