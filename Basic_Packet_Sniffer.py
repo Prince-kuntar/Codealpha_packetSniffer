@@ -94,7 +94,7 @@ class PacketSniffer:
 
         else:
             print("Other Transport Layer Protocol")
-            print("=======================================================================================")                                 
+            print("========================================================================================")                                 
 
     #fun to convert TCP flags to human readable format
     def get_TCP_flags(self, tcp): 
