@@ -1,4 +1,4 @@
-# 🕵️‍♂️ Ultimate Sniffer - CodeAlpha Internship Project
+# 🕵️‍♂️ Ultimate Sniffer - CodeAlpha Cybersecuriy Internship Task 1
 
 **by Prince Damiano**  
 **CodeAlpha Cybersecurity Intern**  
@@ -10,7 +10,7 @@
 
 ## 📋 Project Overview
 
-This project was completed as part of my **Python Programming Internship** at **CodeAlpha**. The task was to build a comprehensive network packet sniffer that demonstrates understanding of networking concepts, Python programming, and practical cybersecurity applications.
+This project was completed as part of my **Cybersecurity Internship** at **CodeAlpha**. The task was to build a basic network packet sniffer that demonstrates understanding of networking concepts, Python programming, and practical cybersecurity applications.
 
 ### 🎯 Task Requirements
 
